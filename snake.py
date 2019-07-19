@@ -26,18 +26,15 @@ class Snake():
         head_xcor = self.body[0][0]
         head_ycor = self.body[0][1]
         if self.direction == "RIGHT":
-            new_xcor = head_xcor + BLOCK_SIZE
-            self.body.insert(0, (new_xcor, head_ycor))
+            head_xcor = head_xcor + BLOCK_SIZE
         elif self.direction == "LEFT":
-            new_xcor = head_xcor - BLOCK_SIZE
-            self.body.insert(0, (new_xcor, head_ycor))
+            head_xcor = head_xcor - BLOCK_SIZE
         elif self.direction == "UP":
-            new_ycor = head_ycor - BLOCK_SIZE
-            self.body.insert(0, (head_xcor, new_ycor))
+            head_ycor = head_ycor - BLOCK_SIZE
         elif self.direction == "DOWN":
-            new_ycor = head_ycor + BLOCK_SIZE
-            self.body.insert(0, (head_xcor, new_ycor))
+            head_ycor = head_ycor + BLOCK_SIZE
         
+        self.body.insert(0, (head_xcor, head_ycor))
         self.body.pop()
 
 class Apple():
