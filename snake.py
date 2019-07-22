@@ -1,18 +1,21 @@
 # Ctrl + Shift + P, then select interpreter
 # Choose an interpreter that works
 import pygame
+import random
 
-BLOCK_SIZE = 20
+GAME_SIZE = 400
+BLOCK_SIZE = GAME_SIZE / 40
 SNAKE_COLOR = (0, 255, 0)
 APPLE_COLOR = (255, 0, 0)
 
 pygame.init()
 clock = pygame.time.Clock()
-game_display = pygame.display.set_mode((500, 500))
+game_display = pygame.display.set_mode((GAME_SIZE, GAME_SIZE))
 pygame.display.set_caption('SNAKE!')
 
 
 class Snake():
+    #this is the constructor
     def __init__(self, xcor, ycor):
         self.is_alive = True
         self.direction = "RIGHT"
@@ -36,15 +39,25 @@ class Snake():
         
         self.body.insert(0, (head_xcor, head_ycor))
         self.body.pop()
+    def has_collided_with_wall(self):
+        head = self.body[0]
+        if head[0] < 0 or head[1] < 0 or head[0] + BLOCK_SIZE > GAME_SIZE or head[1] + BLOCK_SIZE > GAME_SIZE:
+            return True
+        return False
+    def has_eaten_apple(self, apple_in_question):
+        head = self.body[0]
+        if head[0] == apple_in_question.xcor and head[1] == apple_in_question.ycor:
+            return True
+        return False
 
 class Apple():
     def __init__(self):
-        self.xcor = 30
-        self.ycor = 80
+        self.xcor = random.randrange(0, GAME_SIZE / BLOCK_SIZE) * BLOCK_SIZE
+        self.ycor = random.randrange(0, GAME_SIZE / BLOCK_SIZE) * BLOCK_SIZE
     def show(self):
         pygame.draw.rect(game_display, APPLE_COLOR, pygame.Rect(self.xcor, self.ycor, BLOCK_SIZE, BLOCK_SIZE))
 
-snake = Snake(140, 200)
+snake = Snake(BLOCK_SIZE * 5, BLOCK_SIZE * 5)
 apple = Apple()
 
 # Main Game Loop
@@ -66,6 +79,11 @@ while snake.is_alive:
     game_display.blit(game_display, (0, 0))
 
     snake.move()
+    if snake.has_collided_with_wall():
+        snake.is_alive = False
+    
+    if snake.has_eaten_apple(apple):
+        apple = Apple()
 
     game_display.fill((0, 0, 0))
     snake.show()
