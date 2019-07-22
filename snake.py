@@ -7,6 +7,7 @@ GAME_SIZE = 400
 BLOCK_SIZE = GAME_SIZE / 40
 SNAKE_COLOR = (0, 255, 0)
 APPLE_COLOR = (255, 0, 0)
+BACKGROUND_COLOR = (0, 0, 0)
 
 pygame.init()
 clock = pygame.time.Clock()
@@ -57,12 +58,7 @@ class Apple():
     def show(self):
         pygame.draw.rect(game_display, APPLE_COLOR, pygame.Rect(self.xcor, self.ycor, BLOCK_SIZE, BLOCK_SIZE))
 
-snake = Snake(BLOCK_SIZE * 5, BLOCK_SIZE * 5)
-apple = Apple()
-
-# Main Game Loop
-while snake.is_alive:
-
+def handle_events():
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             snake.is_alive = False
@@ -76,6 +72,14 @@ while snake.is_alive:
             elif event.key == pygame.K_DOWN:
                 snake.direction = "DOWN"
 
+snake = Snake(BLOCK_SIZE * 5, BLOCK_SIZE * 5)
+apple = Apple()
+
+# Main Game Loop
+while snake.is_alive:
+
+    handle_events()
+
     game_display.blit(game_display, (0, 0))
 
     snake.move()
@@ -85,11 +89,11 @@ while snake.is_alive:
     if snake.has_eaten_apple(apple):
         apple = Apple()
 
-    game_display.fill((0, 0, 0))
+    game_display.fill(BACKGROUND_COLOR)
     snake.show()
     apple.show()
 
     pygame.display.flip()
-    clock.tick(12)
+    clock.tick(10)
 
 pygame.quit()
