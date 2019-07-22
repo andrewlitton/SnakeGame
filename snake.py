@@ -63,6 +63,12 @@ class Snake():
         if head.xcor == apple_in_question.body.xcor and head.ycor == apple_in_question.body.ycor:
             return True
         return False
+    def has_collided_with_itself(self):
+        head = self.body[0]
+        for i in range(1, len(self.body)):
+            if head.xcor == self.body[i].xcor and head.ycor == self.body[i].ycor:
+                return True
+        return False
 
 class Apple():
     def __init__(self):
@@ -97,12 +103,12 @@ while snake.is_alive:
     game_display.blit(game_display, (0, 0))
 
     snake.move()
-    if snake.has_collided_with_wall():
+    if snake.has_collided_with_wall() or snake.has_collided_with_itself():
         snake.is_alive = False
     
     if snake.has_eaten_apple(apple):
         snake.score += 1
-        snake.grow
+        snake.grow()
         apple = Apple()
 
     game_display.fill(BACKGROUND_COLOR)
