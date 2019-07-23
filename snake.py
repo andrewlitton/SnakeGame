@@ -4,7 +4,7 @@ import pygame
 import random
 
 #game settings
-GAME_SIZE = 400
+GAME_SIZE = 500
 BLOCK_SIZE = GAME_SIZE / 40
 APPLE_COLOR = (255, 0, 0)
 BACKGROUND_COLOR = (0, 0, 0)
@@ -14,7 +14,8 @@ YELLOW = (255, 255, 0)
 GREEN = (76, 230, 0)
 BLUE = (25, 25, 255)
 PURPLE = (170, 0, 204)
-FRAMES_PER_SECOND = 10
+FRAMES_PER_SECOND = 12
+SNAKE_SPEED = 7
 
 pygame.init()
 clock = pygame.time.Clock()
@@ -22,6 +23,16 @@ game_display = pygame.display.set_mode((GAME_SIZE, GAME_SIZE))
 score_font = pygame.font.SysFont('Times New Roman', int(GAME_SIZE * 0.065), True)
 title_font = pygame.font.SysFont('Times New Roman', int(GAME_SIZE * 0.2), True)
 pygame.display.set_caption('SNAKE!')
+
+class Color_Cycler():
+    def __init__(self, *colors):
+        self.colors = []
+        for color in colors:
+            self.colors.append(color)
+    def get_next_color(self):
+        next_color = self.colors.pop()
+        self.colors.insert(0, next_color)
+        return next_color
 
 class Game_Object():
     def __init__(self, xcor, ycor, color):
@@ -61,7 +72,7 @@ class Snake():
     def set_direction_down(self):
         if self.direction != "UP":
             self.direction = "DOWN"
-    def move(self):
+    def move(self, Color_Cycler):
         head_xcor = self.body[0].xcor
         head_ycor = self.body[0].ycor
         if self.direction == "RIGHT":
@@ -72,31 +83,13 @@ class Snake():
             head_ycor = head_ycor - BLOCK_SIZE
         elif self.direction == "DOWN":
             head_ycor = head_ycor + BLOCK_SIZE
-
-        new_color = BLUE
-        if self.color_counter == 0:
-            new_color = RED
-        elif self.color_counter == 1:
-            new_color = ORANGE
-        elif self.color_counter == 2:
-            new_color = YELLOW
-        elif self.color_counter == 3:
-            new_color = GREEN
-        elif self.color_counter == 4:
-            new_color = BLUE
-        elif self.color_counter == 5:
-            new_color = PURPLE
-
-        if self.color_counter == 5:
-            self.color_counter = 0
-        else:
-            self.color_counter += 1
         
-        self.body.insert(0, Game_Object(head_xcor, head_ycor, new_color))
+        self.body.insert(0, Game_Object(head_xcor, head_ycor, Color_Cycler.get_next_color()))
         self.previous_last_tail = self.body.pop()
-    def cycle_colors(self):
+    def cycle_colors(self, Color_Cycler):
         for i in range(len(self.body) - 1, 0, -1):
             self.body[i].color = self.body[i-1].color
+        self.body[0].color = Color_Cycler.get_next_color()
 
     def has_collided_with_wall(self):
         head = self.body[0]
@@ -165,6 +158,7 @@ def pause_game():
         pygame.display.update()
         clock.tick(5)
 
+Color_Cycler = Color_Cycler(RED, ORANGE, YELLOW, GREEN, BLUE, PURPLE)
 snake = Snake(BLOCK_SIZE * 5, BLOCK_SIZE * 5)
 apple = Apple(snake.body)
 
@@ -191,8 +185,8 @@ while snake.is_alive:
 
     game_display.blit(game_display, (0, 0))
 
-    if frame_counter % 2 == 0:
-        snake.move()
+    if frame_counter % max(1, FRAMES_PER_SECOND // SNAKE_SPEED) == 0:
+        snake.move(Color_Cycler)
         if snake.has_collided_with_wall() or snake.has_collided_with_itself():
             snake.is_alive = False
         
@@ -200,12 +194,13 @@ while snake.is_alive:
             snake.score += 1
             snake.grow()
             apple = Apple(snake.body)
+            SNAKE_SPEED += 0.2
 
     game_display.fill(BACKGROUND_COLOR)
     snake.show()
     apple.show()
     frame_counter += 1
-    snake.cycle_colors()
+    snake.cycle_colors(Color_Cycler)
 
     score_text = score_font.render(str(snake.score), False, (255, 255, 255))
     game_display.blit(score_text, (0,0))
